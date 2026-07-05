@@ -423,8 +423,26 @@
   }
   dMonth.value = "0";
 
+  /* ------------------------------------------------------------
+     IFRAME OTOMATİK YÜKSEKLİK BİLDİRİMİ
+     WordPress sayfasındaki dinleyici şu formatta mesaj bekliyor:
+       { teknobirdYasHesaplama: true, height: <px> }
+     Bu fonksiyon olmadan iframe hep sabit min-height'ta kalıyor
+     ve içerik daha kısa olduğunda altta boşluk oluşuyor.
+  ------------------------------------------------------------ */
+  function sendHeightToParent(){
+    if (window.parent === window) return; // önizleme / doğrudan açılışta gerek yok
+    // içerik transition/font yüklemesi bittikten sonra ölçmek için ufak gecikme
+    requestAnimationFrame(function(){
+      const h = document.documentElement.scrollHeight;
+      window.parent.postMessage({ teknobirdYasHesaplama: true, height: h }, '*');
+    });
+  }
+
   timeCheck.addEventListener('change', ()=>{
     timeRow.classList.toggle('open', timeCheck.checked);
+    // time-row açılış/kapanış transition'ı 250ms sürüyor, bittikten sonra tekrar ölç
+    setTimeout(sendHeightToParent, 300);
   });
 
   let tickInterval = null;
@@ -449,6 +467,7 @@
 
     if(birthDate > new Date()){
       weekdayNote.innerHTML = '<strong>Bu tarih henüz gelmedi.</strong> Lütfen geçmiş bir tarih seç.';
+      sendHeightToParent();
       return;
     }
 
@@ -461,6 +480,9 @@
     if(tickInterval) clearInterval(tickInterval);
     renderLive();
     tickInterval = setInterval(renderLive, 1000);
+
+    // panel içeriği görünür olduğuna göre boy değişti, parent'a bildir
+    sendHeightToParent();
   }
 
   function renderLive(){
@@ -517,6 +539,15 @@
   }
 
   calcBtn.addEventListener('click', computeAndRender);
+
+  // Font yükleme, ilk render ve pencere yeniden boyutlandırmalarında da yükseklik bildir
+  window.addEventListener('load', sendHeightToParent);
+  window.addEventListener('resize', sendHeightToParent);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(sendHeightToParent);
+  }
+  // sayfa ilk açıldığında da bir kez gönder
+  sendHeightToParent();
 })();
 </script>
 
