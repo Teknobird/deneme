@@ -3,466 +3,521 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Türkiye Posta Kodu Sorgulama</title>
+<title>Yaş Hesaplama Makinesi — TeknoBird</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --pk-blue: #0b5ed7;
-    --pk-blue-dark: #084bb0;
-    --pk-blue-tint: #eef5ff;
-    --pk-accent: #e63950;
-    --pk-text: #1f2937;
-    --pk-text-soft: #6b7280;
-    --pk-border: #e5e7eb;
-    --pk-bg: #ffffff;
+  :root{
+    --bg:#ffffff;
+    --bg-soft:#f5f5f7;
+    --line:#e7e7ea;
+    --ink:#16161a;
+    --ink-soft:#6d6d78;
+    --red:#e8262b;
+    --red-dark:#c11a1e;
+    --panel:#111114;
+    --panel-line:#2a2b30;
+    --panel-text:#f2f2f4;
+    --gold:#ffb020;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',Arial,Helvetica,sans-serif;
+    line-height:1.4;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:920px;
+    margin:0 auto;
+    padding:28px 20px 34px;
+  }
+  .eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    font-family:'Space Grotesk',sans-serif;
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:.09em;
+    color:var(--red);
+    text-transform:uppercase;
+    margin-bottom:10px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:7px;height:7px;
+    border-radius:50%;
+    background:var(--red);
+    display:inline-block;
+  }
+  h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:clamp(24px,4vw,32px);
+    margin:0 0 6px;
+    letter-spacing:-0.01em;
+  }
+  .sub{
+    color:var(--ink-soft);
+    font-size:14.5px;
+    margin:0 0 26px;
+    max-width:56ch;
   }
 
-  * { box-sizing: border-box; }
-
-  html, body {
-    margin: 0;
-    padding: 0;
-    background: transparent;
+  .grid{
+    display:grid;
+    grid-template-columns:1fr 1.15fr;
+    gap:18px;
+    align-items:stretch;
+  }
+  @media (max-width:720px){
+    .grid{grid-template-columns:1fr;}
   }
 
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    display: flex;
-    justify-content: center;
+  /* ---------- INPUT CARD ---------- */
+  .card{
+    background:var(--bg-soft);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:22px;
+  }
+  .field-label{
+    font-size:12px;
+    font-weight:600;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    margin:0 0 8px;
+  }
+  .date-row{
+    display:grid;
+    grid-template-columns:1fr 1.4fr 1.1fr;
+    gap:8px;
+    margin-bottom:18px;
+  }
+  select{
+    appearance:none;
+    -webkit-appearance:none;
+    width:100%;
+    background:#fff url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0L5 6L10 0" fill="none" stroke="%236d6d78" stroke-width="1.4"/></svg>') no-repeat right 12px center;
+    border:1px solid var(--line);
+    border-radius:9px;
+    padding:11px 30px 11px 12px;
+    font-family:'Inter',sans-serif;
+    font-size:14.5px;
+    font-weight:500;
+    color:var(--ink);
+    cursor:pointer;
+  }
+  select:focus{
+    outline:none;
+    border-color:var(--red);
+    box-shadow:0 0 0 3px rgba(232,38,43,.12);
+  }
+  .time-toggle{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13.5px;
+    color:var(--ink-soft);
+    margin-bottom:14px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .time-toggle input{
+    width:16px;height:16px;
+    accent-color:var(--red);
+    cursor:pointer;
+  }
+  .time-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-bottom:18px;
+    max-height:0;
+    opacity:0;
+    overflow:hidden;
+    transition:max-height .25s ease, opacity .2s ease, margin-bottom .25s ease;
+  }
+  .time-row.open{
+    max-height:70px;
+    opacity:1;
+  }
+  button.calc{
+    width:100%;
+    background:var(--red);
+    color:#fff;
+    border:none;
+    border-radius:9px;
+    padding:13px;
+    font-family:'Space Grotesk',sans-serif;
+    font-size:15px;
+    font-weight:600;
+    letter-spacing:.01em;
+    cursor:pointer;
+    transition:background .15s ease, transform .1s ease;
+  }
+  button.calc:hover{background:var(--red-dark);}
+  button.calc:active{transform:scale(.985);}
+
+  .weekday-note{
+    margin-top:14px;
+    font-size:13px;
+    color:var(--ink-soft);
+    min-height:18px;
+  }
+  .weekday-note strong{color:var(--ink);}
+
+  /* ---------- RESULT PANEL ---------- */
+  .panel{
+    background:var(--panel);
+    color:var(--panel-text);
+    border-radius:var(--radius);
+    padding:24px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .panel::before{
+    content:"";
+    position:absolute;
+    top:-40%; right:-20%;
+    width:260px;height:260px;
+    background:radial-gradient(circle, rgba(232,38,43,.18), transparent 70%);
+    pointer-events:none;
+  }
+  .panel .placeholder{
+    color:#8b8b92;
+    font-size:14px;
+    text-align:center;
+    padding:20px 10px;
+  }
+  .panel-content{display:none;}
+  .panel-content.show{display:block;}
+
+  .headline-age{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    margin-bottom:4px;
+  }
+  .headline-age .num{
+    font-family:'JetBrains Mono',monospace;
+    font-size:52px;
+    font-weight:700;
+    color:#fff;
+    line-height:1;
+  }
+  .headline-age .label{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:15px;
+    color:#b7b7bd;
+    font-weight:500;
+  }
+  .headline-sub{
+    font-size:13px;
+    color:#9a9aa2;
+    margin-bottom:20px;
+    padding-bottom:18px;
+    border-bottom:1px solid var(--panel-line);
   }
 
-  .pk-container {
-    width: 100%;
-    max-width: 650px;
-    margin: 0;
-    padding: 28px 30px 24px;
-    background: var(--pk-bg);
-    border-radius: 14px;
-    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
-    border: 1px solid var(--pk-border);
-    position: relative;
-    overflow: hidden;
+  .stat-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+    margin-bottom:20px;
+  }
+  .stat{
+    background:#18191d;
+    border:1px solid var(--panel-line);
+    border-radius:10px;
+    padding:11px 8px;
+    text-align:center;
+  }
+  .stat .val{
+    font-family:'JetBrains Mono',monospace;
+    font-weight:600;
+    font-size:15px;
+    color:#fff;
+    display:block;
+    white-space:nowrap;
+  }
+  .stat .lab{
+    font-size:10.5px;
+    color:#8b8b92;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    margin-top:3px;
+    display:block;
+  }
+  .stat.live .val{color:var(--gold);}
+
+  .countdown{
+    background:#18191d;
+    border:1px solid var(--panel-line);
+    border-radius:10px;
+    padding:14px 16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .countdown .cd-label{
+    font-size:12.5px;
+    color:#9a9aa2;
+  }
+  .countdown .cd-val{
+    font-family:'JetBrains Mono',monospace;
+    font-weight:600;
+    font-size:15px;
+    color:var(--gold);
   }
 
-  .pk-container::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--pk-blue) 0%, var(--pk-accent) 100%);
+  footer{
+    margin-top:22px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+    font-size:12px;
+    color:var(--ink-soft);
+    padding-top:16px;
+    border-top:1px solid var(--line);
   }
-
-  .pk-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 1.15rem;
-    color: var(--pk-text);
-    margin: 4px 0 22px;
-    font-weight: 700;
+  footer a{
+    color:var(--red);
+    font-weight:600;
+    text-decoration:none;
   }
-
-  .pk-title-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
-    border-radius: 8px;
-    background: var(--pk-blue-tint);
-    color: var(--pk-accent);
-    font-size: 1rem;
-    flex-shrink: 0;
-  }
-
-  .pk-form-row {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 0;
-  }
-
-  .pk-form-group {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .pk-form-group label {
-    display: block;
-    font-size: 0.82rem;
-    color: var(--pk-text-soft);
-    margin-bottom: 7px;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-  }
-
-  .pk-select-wrap {
-    position: relative;
-  }
-
-  .pk-select-wrap::after {
-    content: "";
-    position: absolute;
-    right: 14px;
-    top: 50%;
-    width: 8px;
-    height: 8px;
-    border-right: 2px solid var(--pk-text-soft);
-    border-bottom: 2px solid var(--pk-text-soft);
-    transform: translateY(-70%) rotate(45deg);
-    pointer-events: none;
-  }
-
-  .pk-select {
-    width: 100%;
-    padding: 11px 34px 11px 13px;
-    border: 1.5px solid var(--pk-border);
-    border-radius: 9px;
-    font-size: 0.95rem;
-    color: var(--pk-text);
-    background-color: #fbfcfe;
-    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
-    appearance: none;
-    cursor: pointer;
-    font-family: inherit;
-  }
-
-  .pk-select:hover:not(:disabled) {
-    border-color: #c7d7ef;
-  }
-
-  .pk-select:focus {
-    outline: none;
-    border-color: var(--pk-blue);
-    background-color: #fff;
-    box-shadow: 0 0 0 3px rgba(11, 94, 215, 0.12);
-  }
-
-  .pk-select:disabled {
-    background-color: #f4f5f7;
-    color: #a1a8b3;
-    cursor: not-allowed;
-  }
-
-  /* DÜZELTME: sabit max-height yerine JS ile hesaplanan değer kullanılıyor.
-     Başlangıçta max-height: none, açılırken JS class ekleyip inline stil
-     olarak gerçek yüksekliği set ediyor; böylece hiçbir zaman kesilme olmuyor. */
-  .pk-result {
-    margin-top: 0;
-    padding: 0;
-    max-height: 0;
-    opacity: 0;
-    overflow: hidden;
-    transition: max-height 0.35s ease, opacity 0.3s ease, margin-top 0.35s ease;
-  }
-
-  .pk-result.pk-visible {
-    margin-top: 18px;
-    opacity: 1;
-    /* max-height JS tarafından inline olarak ayarlanır (bkz. script) */
-  }
-
-  .pk-result-inner {
-    padding: 18px 20px;
-    background-color: var(--pk-blue-tint);
-    border-left: 4px solid var(--pk-blue);
-    border-radius: 8px;
-  }
-
-  .pk-result-flex {
-    display: flex;
-    align-items: stretch;
-    flex-wrap: wrap;
-    gap: 14px;
-  }
-
-  .pk-sub-result {
-    text-align: center;
-    flex: 1;
-    min-width: 140px;
-  }
-
-  .pk-result-title {
-    font-size: 0.78rem;
-    color: var(--pk-text-soft);
-    font-weight: 600;
-  }
-
-  .pk-result-text {
-    font-size: 1.6rem;
-    color: var(--pk-blue-dark);
-    font-weight: 800;
-    margin-top: 3px;
-    letter-spacing: 0.02em;
-  }
-
-  #ilceSonucAlani .pk-result-text {
-    color: var(--pk-accent);
-  }
-
-  .pk-divider {
-    border-left: 1px dashed #b9d3f5;
-    display: none;
-  }
-
-  .pk-note {
-    font-size: 0.72rem;
-    color: #9ca3af;
-    text-align: center;
-    margin: 18px 0 0;
-  }
-
-  @media (max-width: 480px) {
-    .pk-container { padding: 22px 18px 18px; }
-    .pk-form-row { flex-direction: column; gap: 14px; }
-    .pk-result-flex { flex-direction: column; gap: 12px; }
-    .pk-divider {
-      border-left: none;
-      border-top: 1px dashed #b9d3f5;
-      width: 100%;
-      height: 1px;
-      margin: 2px 0;
-    }
-  }
+  footer a:hover{text-decoration:underline;}
 </style>
 </head>
 <body>
 
-<div class="pk-container" id="pkContainer">
-  <div class="pk-title"><span class="pk-title-icon">📍</span>Türkiye Posta Kodu Sorgulama</div>
+<div class="wrap">
 
-  <div class="pk-form-row">
-    <div class="pk-form-group">
-      <label for="ilSecim">İl Seçiniz</label>
-      <div class="pk-select-wrap">
-        <select id="ilSecim" class="pk-select">
-          <option value="">Lütfen bir il seçin</option>
+  <div class="eyebrow">TeknoBird Araçları</div>
+  <h1>Yaş Hesaplama Makinesi</h1>
+  <p class="sub">Doğum tarihini seç, yaşını yıl-ay-gün olarak öğren; ayrıca doğduğun günden bu yana geçen hafta, gün, saat, dakika ve saniyeyi canlı olarak takip et.</p>
+
+  <div class="grid">
+
+    <!-- INPUT -->
+    <div class="card">
+      <p class="field-label">Doğum tarihi</p>
+      <div class="date-row">
+        <select id="d-day" aria-label="Gün"></select>
+        <select id="d-month" aria-label="Ay">
+          <option value="0">Ocak</option><option value="1">Şubat</option><option value="2">Mart</option>
+          <option value="3">Nisan</option><option value="4">Mayıs</option><option value="5">Haziran</option>
+          <option value="6">Temmuz</option><option value="7">Ağustos</option><option value="8">Eylül</option>
+          <option value="9">Ekim</option><option value="10">Kasım</option><option value="11">Aralık</option>
         </select>
+        <select id="d-year" aria-label="Yıl"></select>
       </div>
+
+      <label class="time-toggle">
+        <input type="checkbox" id="time-check">
+        Doğum saatini biliyorum
+      </label>
+      <div class="time-row" id="time-row">
+        <select id="d-hour" aria-label="Saat"></select>
+        <select id="d-min" aria-label="Dakika"></select>
+      </div>
+
+      <button class="calc" id="calc-btn">Yaşımı Hesapla</button>
+
+      <p class="weekday-note" id="weekday-note"></p>
     </div>
 
-    <div class="pk-form-group">
-      <label for="ilceSecim">İlçe Seçiniz</label>
-      <div class="pk-select-wrap">
-        <select id="ilceSecim" class="pk-select" disabled>
-          <option value="">Önce il seçmelisiniz</option>
-        </select>
-      </div>
-    </div>
-  </div>
+    <!-- RESULT -->
+    <div class="panel">
+      <div class="placeholder" id="placeholder">Sonuçları görmek için soldan doğum tarihini seç ve “Yaşımı Hesapla”ya bas.</div>
 
-  <div id="sonucAlani" class="pk-result">
-    <div class="pk-result-inner">
-      <div class="pk-result-flex">
-        <div class="pk-sub-result" id="ilSonucAlani">
-          <div class="pk-result-title"><span id="txtSecilenIl">-</span> Genel Kodu</div>
-          <div id="ilPostaKodu" class="pk-result-text">-</div>
+      <div class="panel-content" id="panel-content">
+        <div class="headline-age">
+          <span class="num" id="age-years">0</span>
+          <span class="label">yaşındasın</span>
+        </div>
+        <div class="headline-sub" id="age-detail">0 ay, 0 gün</div>
+
+        <div class="stat-grid">
+          <div class="stat"><span class="val" id="stat-months">0</span><span class="lab">Ay</span></div>
+          <div class="stat"><span class="val" id="stat-weeks">0</span><span class="lab">Hafta</span></div>
+          <div class="stat"><span class="val" id="stat-days">0</span><span class="lab">Gün</span></div>
+          <div class="stat"><span class="val" id="stat-hours">0</span><span class="lab">Saat</span></div>
+          <div class="stat"><span class="val" id="stat-mins">0</span><span class="lab">Dakika</span></div>
+          <div class="stat live"><span class="val" id="stat-secs">0</span><span class="lab">Saniye</span></div>
         </div>
 
-        <div id="sonucCizgisi" class="pk-divider"></div>
-
-        <div class="pk-sub-result" id="ilceSonucAlani" style="display: none;">
-          <div class="pk-result-title"><span id="txtSecilenIlce">-</span> İlçe Kodu</div>
-          <div id="ilcePostaKodu" class="pk-result-text">-</div>
+        <div class="countdown">
+          <span class="cd-label">Sonraki doğum gününe kalan</span>
+          <span class="cd-val" id="cd-val">—</span>
         </div>
       </div>
     </div>
+
   </div>
 
-  <div class="pk-note">* Sonuçlar resmi merkez kodlarını gösterir.</div>
+  <footer>
+    <span>Bu araç <a href="https://teknobird.com" target="_blank" rel="noopener">TeknoBird</a> tarafından geliştirilmiştir.</span>
+    <span id="today-note"></span>
+  </footer>
+
 </div>
 
 <script>
-  // 81 İlin Genel/Merkez Posta Kodları
-  const ilGenelKodlari = {
-    "Adana":"01000", "Adıyaman":"02000", "Afyonkarahisar":"03000", "Ağrı":"04000", "Amasya":"05000", "Ankara":"06000", "Antalya":"07000", "Artvin":"08000", "Aydın":"09000", "Balıkesir":"10000", "Bilecik":"11000", "Bingöl":"12000", "Bitlis":"13000", "Bolu":"14000", "Burdur":"15000", "Bursa":"16000", "Çanakkale":"17000", "Çankırı":"18000", "Çorum":"19000", "Denizli":"20000", "Diyarbakır":"21000", "Edirne":"22000", "Elazığ":"23000", "Erzincan":"24000", "Erzurum":"25000", "Eskişehir":"26000", "Gaziantep":"27000", "Giresun":"28000", "Gümüşhane":"29000", "Hakkari":"30000", "Hatay":"31000", "Isparta":"32000", "Mersin":"33000", "İstanbul":"34000", "İzmir":"35000", "Kars":"36000", "Kastamonu":"37000", "Kayseri":"38000", "Kırklareli":"39000", "Kırşehir":"40000", "Kocaeli":"41000", "Konya":"42000", "Kütahya":"43000", "Malatya":"44000", "Manisa":"45000", "Kahramanmaraş":"46000", "Mardin":"47000", "Muğla":"48000", "Muş":"49000", "Nevşehir":"50000", "Niğde":"51000", "Ordu":"52000", "Rize":"53000", "Sakarya":"54000", "Samsun":"55000", "Siirt":"56000", "Sinop":"57000", "Sivas":"58000", "Tekirdağ":"59000", "Tokat":"60000", "Trabzon":"61000", "Tunceli":"62000", "Şanlıurfa":"63000", "Uşak":"64000", "Van":"65000", "Yozgat":"66000", "Zonguldak":"67000", "Aksaray":"68000", "Bayburt":"69000", "Karaman":"70000", "Kırıkkale":"71000", "Batman":"72000", "Şırnak":"73000", "Bartın":"74000", "Ardahan":"75000", "Iğdır":"76000", "Yalova":"77000", "Karabük":"78000", "Kilis":"79000", "Osmaniye":"80000", "Düzce":"81000"
-  };
+(function(){
+  const dDay = document.getElementById('d-day');
+  const dMonth = document.getElementById('d-month');
+  const dYear = document.getElementById('d-year');
+  const dHour = document.getElementById('d-hour');
+  const dMin = document.getElementById('d-min');
+  const timeCheck = document.getElementById('time-check');
+  const timeRow = document.getElementById('time-row');
+  const calcBtn = document.getElementById('calc-btn');
+  const weekdayNote = document.getElementById('weekday-note');
+  const placeholder = document.getElementById('placeholder');
+  const panelContent = document.getElementById('panel-content');
+  const todayNote = document.getElementById('today-note');
 
-  // Güncel 973 İlçe Veritabanı
-  const postaKoduVerisi = {
-    "Adana": {"Aladağ":"01720", "Ceyhan":"01920", "Çukurova":"01170", "Feke":"01660", "İmamoğlu":"01700", "Karaisalı":"01770", "Karataş":"01900", "Kozan":"01500", "Pozantı":"01470", "Saimbeyli":"01610", "Sarıçam":"01250", "Seyhan":"01130", "Tufanbeyli":"01630", "Yumurtalık":"01910", "Yüreğir":"01230"},
-    "Adıyaman": {"Besni":"02300", "Çelikhan":"02600", "Gerger":"02700", "Gölbaşı":"02500", "Kahta":"02400", "Merkez":"02000", "Samsat":"02800", "Sincik":"02900", "Tut":"02350"},
-    "Afyonkarahisar": {"Başmakçı":"03450", "Bayat":"03780", "Bolvadin":"03300", "Çay":"03100", "Çobanlar":"03330", "Dazkırı":"03950", "Dinar":"03030", "Emirdağ":"03800", "Evciler":"03900", "Hocalar":"03530", "İhsaniye":"03370", "İscehisar":"03750", "Kızılören":"03060", "Merkez":"03000", "Sandıklı":"03500", "Sinanpaşa":"03850", "Sultandağı":"03160", "Şuhut":"03900"},
-    "Ağrı": {"Diyadin":"04200", "Doğubayazıt":"04100", "Eleşkirt":"04600", "Hamur":"04700", "Merkez":"04000", "Patnos":"04500", "Taşlıçay":"04300", "Tutak":"04400"},
-    "Amasya": {"Göynücek":"05900", "Gümüşhacıköy":"05500", "Hamamözü":"05720", "Merkez":"05000", "Merzifon":"05300", "Suluova":"05400", "Taşova":"05800"},
-    "Ankara": {"Akyurt":"06750", "Altındağ":"06050", "Ayaş":"06710", "Bala":"06720", "Beypazarı":"06730", "Çamlıdere":"06740", "Çankaya":"06690", "Çubuk":"06760", "Elmadağ":"06780", "Etimesgut":"06790", "Evren":"06770", "Gölbaşı":"06830", "Güdül":"06840", "Haymana":"06860", "Kahramankazan":"06980", "Kalecik":"06870", "Keçiören":"06120", "Kızılcahamam":"06890", "Mamak":"06260", "Nallıhan":"06920", "Polatlı":"06900", "Pursaklar":"06145", "Sincan":"06930", "Şereflikoçhisar":"06950", "Yenimahalle":"06170"},
-    "Antalya": {"Akseki":"07630", "Aksu":"07112", "Alanya":"07400", "Demre":"07570", "Döşemealtı":"07190", "Elmalı":"07700", "Finike":"07740", "Gazipaşa":"07900", "Gündoğmuş":"07800", "İbradı":"07680", "Kaş":"07580", "Kemer":"07980", "Kepez":"07060", "Konyaaltı":"07070", "Korkuteli":"07800", "Kumluca":"07350", "Manavgat":"07600", "Muratpaşa":"07100", "Serik":"07500"},
-    "Artvin": {"Ardanuç":"08300", "Arhavi":"08200", "Borçka":"08400", "Hopa":"08600", "Kemalpaşa":"08610", "Merkez":"08000", "Murgul":"08500", "Şavşat":"08700", "Yusufeli":"08800"},
-    "Aydın": {"Bozdoğan":"09760", "Buharkent":"09170", "Çine":"09500", "Didim":"09270", "Efeler":"09010", "Germencik":"09400", "İincirliova":"09600", "Karacasu":"09370", "Karpuzlu":"09540", "Koçarlı":"09970", "Köşk":"09570", "Kuşadası":"09400", "Kuyucak":"09320", "Nazilli":"09800", "Söke":"09200", "Sultanhisar":"09470", "Yenipazar":"09350"},
-    "Balıkesir": {"Altıeylül":"10100", "Ayvalık":"10400", "Balya":"10840", "Bandırma":"10200", "Bigadiç":"10440", "Burhaniye":"10700", "Dursunbey":"10800", "Edremit":"10300", "Erdek":"10500", "Gömeç":"10715", "Gönen":"10900", "Havran":"10560", "İvrindi":"10770", "Karesi":"10010", "Kepsut":"10660", "Manyas":"10470", "Marmara":"10350", "Savaştepe":"10580", "Sındırgı":"10330", "Susurluk":"10600"},
-    "Bilecik": {"Bozüyük":"11300", "Gölpazarı":"11700", "İnhisar":"11800", "Merkez":"11000", "Osmaneli":"11500", "Pazaryeri":"11830", "Söğüt":"11400", "Yenipazar":"11600"},
-    "Bingöl": {"Adaklı":"12100", "Genç":"12500", "Karlıova":"12600", "Kiğı":"12200", "Merkez":"12000", "Solhan":"12400", "Yayladere":"12300", "Yedisu":"12120"},
-    "Bitlis": {"Adilcevaz":"13500", "Ahlat":"13450", "Güroymak":"13200", "Hizan":"13600", "Merkez":"13000", "Mutki":"13700", "Tatvan":"13400"},
-    "Bolu": {"Dörtdivan":"14910", "Gerede":"14900", "Göynük":"14780", "Kıbrıscık":"14610", "Mengen":"14860", "Merkez":"14000", "Mudurnu":"14800", "Seben":"14750", "Yeniçağa":"14920"},
-    "Burdur": {"Ağlasun":"15800", "Altınyayla":"15360", "Bucak":"15300", "Çavdır":"15330", "Çeltikçi":"15310", "Gölhisar":"15400", "Karamanlı":"15350", "Kemer":"15340", "Merkez":"15000", "Tefenni":"15600", "Yeşilova":"15100"},
-    "Bursa": {"Büyükorhan":"16990", "Gemlik":"16600", "Gürsu":"16580", "Harmancık":"16450", "İnegöl":"16400", "İznik":"16860", "Karacabey":"16700", "Keles":"16740", "Kestel":"16450", "Mudanya":"16940", "Mustafakemalpaşa":"16500", "Nilüfer":"16130", "Orhaneli":"16790", "Orhangazi":"16800", "Osmangazi":"16050", "Yenişehir":"16900", "Yıldırım":"16320"},
-    "Çanakkale": {"Ayvacık":"17800", "Bayramiç":"17700", "Biga":"17200", "Bozcaada":"17680", "Çan":"17400", "Eceabat":"17900", "Ezine":"17600", "Gelibolu":"17500", "Gökçeada":"17760", "Lapseki":"17100", "Merkez":"17000", "Yenice":"17550"},
-    "Çankırı": {"Atkaracalar":"18310", "Bayramören":"18330", "Çerkeş":"18600", "Eldivan":"18700", "Ilgaz":"18400", "Kızılırmak":"18280", "Korgun":"18100", "Kurşunlu":"18300", "Merkez":"18000", "Orta":"18300", "Şabanözü":"18650", "Yapraklı":"18900"},
-    "Çorum": {"Alaca":"19100", "Bayat":"19800", "Boğazkale":"19310", "Dodurga":"19700", "İskilip":"19400", "Kargı":"19900", "Laçin":"19600", "Mecitözü":"19750", "Merkez":"19000", "Oğuzlar":"19430", "Ortaköy":"19950", "Osmancık":"19500", "Sungurlu":"19300", "Uğurludağ":"19850"},
-    "Denizli": {"Acıpayam":"20300", "Babadağ":"20470", "Baklan":"20700", "Bekilli":"20800", "Beyağaç":"20590", "Bozkurt":"20360", "Buldan":"20400", "Çal":"20700", "Çameli":"20860", "Çardak":"20350", "Çivril":"20600", "Güney":"20460", "Honaz":"20330", "Kale":"20570", "Merkezefendi":"20020", "Pamukkale":"20150", "Sarayköy":"20300", "Serinhisar":"20430", "Tavas":"20500"},
-    "Diyarbakır": {"Bağlar":"21050", "Bismil":"21500", "Çermik":"21600", "Çınar":"21100", "Çüngüş":"21650", "Dicle":"21800", "Eğil":"21850", "Ergani":"21900", "Hani":"21700", "Hazro":"21760", "Kayapınar":"21070", "Kocaköy":"21560", "Kulp":"21950", "Lice":"21750", "Silvan":"21600", "Sur":"21200", "Yenişehir":"21100"},
-    "Edirne": {"Enez":"22700", "Havsa":"22500", "İpsala":"22400", "Keşan":"22800", "Lalapaşa":"22550", "Meriç":"22600", "Merkez":"22000", "Süloğlu":"22580", "Uzunköprü":"22200"},
-    "Elazığ": {"Ağın":"23960", "Alacakaya":"23050", "Arıcak":"23060", "Baskil":"23850", "Karakoçan":"23500", "Keban":"23710", "Kovancılar":"23800", "Maden":"23700", "Merkez":"23000", "Palu":"23900", "Sivrice":"23600"},
-    "Erzincan": {"Çayırlı":"24540", "İliç":"24700", "Kemah":"24600", "Kemaliye":"24650", "Merkez":"24000", "Otlukbeli":"24550", "Refahiye":"24300", "Tercan":"24500", "Üzümlü":"24160"},
-    "Erzurum": {"Aşkale":"25500", "Aziziye":"25100", "Çat":"25750", "Hınıs":"25600", "Horasan":"25800", "İspir":"25900", "Karaçoban":"25610", "Karayazı":"25650", "Köprüköy":"25830", "Narman":"25530", "Oltu":"25400", "Olur":"25560", "Palandöken":"25070", "Pasinler":"25200", "Pazaryolu":"25930", "Şenkaya":"25300", "Tekman":"25560", "Tortum":"25450", "Uzundere":"25440", "Yakutiye":"25050"},
-    "Eskişehir": {"Alpu":"26900", "Beylikova":"26800", "Çeler":"26100", "Çifteler":"26700", "Günyüzü":"26420", "Han":"26750", "İnönü":"26670", "Mahmudiye":"26850", "Mihalgazi":"26950", "Mihalıççık":"26980", "Odunpazarı":"26010", "Sarıcakaya":"26930", "Seyitgazi":"26940", "Sivrihisar":"26600", "Tepebaşı":"26120"},
-    "Gaziantep": {"Araban":"27650", "İslahiye":"27400", "Karkamış":"27830", "Nizip":"27700", "Nurdağı":"27300", "Oğuzeli":"27900", "Şahinbey":"27010", "Şehitkamil":"27500", "Yavuzeli":"27950"},
-    "Giresun": {"Alucra":"28700", "Bulancak":"28300", "Çamoluk":"28710", "Çanakçı":"28810", "Dereli":"28950", "Doğankent":"28900", "Espiye":"28500", "Eynesil":"28850", "Görele":"28800", "Güce":"28510", "Keşap":"28900", "Merkez":"28000", "Piraziz":"28340", "Şebinkarahisar":"28400", "Tirebolu":"28600", "Yağlıdere":"28610"},
-    "Gümüşhane": {"Kelkit":"29600", "Köse":"29650", "Kürtün":"29800", "Merkez":"29000", "Şiran":"29700", "Torul":"29800"},
-    "Hakkari": {"Çukurca":"30400", "Derecik":"30510", "Merkez":"30000", "Şemdinli":"30500", "Yüksekova":"30300"},
-    "Hatay": {"Altınözü":"31750", "Antakya":"31000", "Arsuz":"31280", "Belen":"31350", "Defne":"31160", "Dörtyol":"31400", "Erzin":"31960", "Hassa":"31700", "İskenderun":"31200", "Kırıkhan":"31440", "Kumlu":"31520", "Payas":"31370", "Reyhanlı":"31500", "Samandağ":"31500", "Yayladağı":"31100"},
-    "Isparta": {"Aksu":"32510", "Atabey":"32670", "Eğirdir":"32500", "Gelendost":"32530", "Gönen":"32050", "Keçiborlu":"32750", "Merkez":"32000", "Senirkent":"32260", "Sütçüler":"32570", "Şarkikaraağaç":"32800", "Uluborlu":"32650", "Yalvaç":"32700", "Yenişarbademli":"32850"},
-    "Mersin": {"Akdeniz":"33010", "Anamur":"33830", "Aydıncık":"33840", "Bozyazı":"33830", "Çamlıyayla":"33580", "Erdemli":"33730", "Gülnar":"33700", "Mezitli":"33200", "Mut":"33600", "Silifke":"33940", "Tarsus":"33400", "Toroslar":"33220", "Yenişehir":"33110"},
-    "İstanbul": {"Adalar":"34970", "Arnavutköy":"34283", "Ataşehir":"34758", "Avcılar":"34320", "Bağcılar":"34200", "Bahçelievler":"34180", "Bakırköy":"34140", "Başakşehir":"34480", "Bayrampaşa":"34030", "Beşiktaş":"34353", "Beykoz":"34800", "Beylikdüzü":"34520", "Beyoğlu":"34421", "Büyükçekmece":"34500", "Çatalca":"34540", "Çekmeköy":"34782", "Esenler":"34220", "Esenyurt":"34510", "Eyüpsultan":"34050", "Fatih":"34093", "Gaziosmanpaşa":"34245", "Güngören":"34160", "Kadıköy":"34710", "Kağıthane":"34406", "Kartal":"34860", "Küçükçekmece":"34290", "Maltepe":"34840", "Pendik":"34890", "Sancaktepe":"34885", "Sarıyer":"34450", "Silivri":"34570", "Sultanbeyli":"34920", "Sultangazi":"34270", "Şile":"34980", "Şişli":"34360", "Tuzla":"34940", "Ümraniye":"34760", "Üsküdar":"34660", "Zeytinburnu":"34020"},
-    "İzmir": {"Aliağa":"35800", "Balçova":"35330", "Bayındır":"35840", "Bayraklı":"35530", "Bergama":"35700", "Beydağ":"35790", "Bornova":"35040", "Buca":"35390", "Çeşme":"35930", "Çiğli":"35620", "Dikili":"35980", "Foça":"35680", "Gaziemir":"35410", "Güzelbahçe":"35310", "Karabağlar":"35130", "Karaburun":"35960", "Karşıyaka":"35500", "Kemalpaşa":"35730", "Kınık":"35990", "Kiraz":"35890", "Konak":"35210", "Menderes":"35470", "Menemen":"35660", "Narlıdere":"35320", "Ödemiş":"35750", "Seferihisar":"35460", "Selçuk":"35920", "Tire":"35900", "Torbalı":"35860", "Urla":"35430"},
-    "Kars": {"Akyaka":"36800", "Arpaçay":"36300", "Digor":"36700", "Kağızman":"36900", "Merkez":"36000", "Sarıkamış":"36500", "Selim":"36600", "Susuz":"36750"},
-    "Kastamonu": {"Abana":"37970", "Ağlı":"37940", "Araç":"37800", "Azdavay":"37750", "Bozkurt":"37960", "Cide":"37840", "Çatalzeytin":"37950", "Daday":"37860", "Devrekani":"37900", "Doğanyurt":"37850", "Hanönü":"37920", "İhsangazi":"37870", "İnebolu":"37500", "Küre":"37910", "Merkez":"37000", "Pınarbaşı":"37770", "Seydiler":"37930", "Şenpazar":"37880", "Taşköprü":"37400", "Tosya":"37300"},
-    "Kayseri": {"Akkışla":"38730", "Bünyan":"38600", "Develi":"38400", "Felahiye":"38850", "Hacılar":"38140", "İncesu":"38800", "Kocasinan":"38020", "Melikgazi":"38030", "Özvatan":"38740", "Pınarbaşı":"38700", "Sarıoğlan":"38830", "Sarız":"38450", "Talas":"38280", "Tomarza":"38900", "Yahyalı":"38500", "Yeşilhisar":"38300"},
-    "Kırklareli": {"Babaeski":"39200", "Demirköy":"39500", "Kofçaz":"39750", "Lüleburgaz":"39700", "Merkez":"39000", "Pehlivanköy":"39300", "Pınarhisar":"39350", "Vize":"39400"},
-    "Kırşehir": {"Akçakent":"40720", "Akpınar":"40730", "Boztepe":"40710", "Çiçekdağı":"40700", "Kaman":"40300", "Merkez":"40000", "Mucur":"40200"},
-    "Kocaeli": {"Başiskele":"41140", "Çayırova":"41420", "Darıca":"41400", "Derince":"41900", "Dilovası":"41455", "Gebze":"41400", "Gölcük":"41650", "İzmit":"41040", "Kandıra":"41600", "Karamürsel":"41500", "Kartepe":"41180", "Körfez":"41750"},
-    "Konya": {"Ahırlı":"42930", "Akören":"42460", "Akşehir":"42550", "Altınekin":"42780", "Beyşehir":"42700", "Bozkır":"42650", "Cihanbeyli":"42850", "Çeltik":"42830", "Çumra":"42500", "Derbent":"42160", "Derebucak":"42760", "Doğanhisar":"42560", "Emirgazi":"42720", "Ereğli":"42310", "Güneysınır":"42490", "Hadim":"42870", "Halkapınar":"42340", "Hüyük":"42710", "Ilgın":"42600", "Kadınhanı":"42800", "Karapınar":"42400", "Karatay":"42020", "Kulu":"42770", "Meram":"42010", "Sarayönü":"42430", "Selçuklu":"42060", "Seydişehir":"42370", "Taşkent":"42880", "Tuzlukçu":"42550", "Yalıhüyük":"42940", "Yunak":"42810"},
-    "Kütahya": {"Altıntaş":"43800", "Aslanapa":"43120", "Çavdarhisar":"43130", "Domaniç":"43220", "Dumlupınar":"43820", "Emet":"43700", "Gediz":"43600", "Hisarcık":"43740", "Merkez":"43000", "Pazarlar":"43760", "Simav":"43500", "Şaphane":"43770", "Tavşanlı":"43300"},
-    "Malatya": {"Akçadağ":"44210", "Arapgir":"44800", "Arguvan":"44900", "Battalgazi":"44010", "Darende":"44700", "Doğanşehir":"44200", "Doğanyol":"44860", "Hekimhan":"44400", "Kale":"44370", "Kuluncak":"44760", "Pütürge":"44850", "Yazıhan":"44350", "Yeşilyurt":"44110"},
-    "Manisa": {"Ahmetli":"45450", "Akhisar":"45200", "Alaşehir":"45600", "Demirci":"45900", "Gölmarmara":"45320", "Gördes":"45800", "Kırkağaç":"45700", "Köprübaşı":"45880", "Kula":"45170", "Salihli":"45300", "Sarıgöl":"45470", "Saruhanlı":"45800", "Selendi":"45970", "Soma":"45500", "Şehzadeler":"45010", "Turgutlu":"45400", "Yunusemre":"45030"},
-    "Kahramanmaraş": {"Afşin":"46500", "Andırın":"46400", "Çağlayancerit":"46720", "Dulkadiroğlu":"46060", "Ekinözü":"46360", "Elbistan":"46300", "Göksun":"46600", "Nurhak":"46450", "Onikişubat":"46050", "Pazarcık":"46200", "Türkoğlu":"46800"},
-    "Mardin": {"Artuklu":"47100", "Dargeçit":"47800", "Derik":"47850", "Kızıltepe":"47400", "Mazıdağı":"47700", "Midyat":"47500", "Nusaybin":"47300", "Ömerli":"47560", "Savur":"47650", "Yeşilli":"47110"},
-    "Muğla": {"Bodrum":"48400", "Dalaman":"48770", "Datça":"48900", "Fethiye":"48300", "Kavaklıdere":"48590", "Köyceğiz":"48800", "Marmaris":"48700", "Menteşe":"48000", "Milas":"48200", "Ortaca":"48600", "Seydikemer":"48360", "Ula":"48140", "Yatağan":"48500"},
-    "Muş": {"Bulanık":"49500", "Hasköy":"49250", "Korkut":"49300", "Malazgirt":"49400", "Merkez":"49000", "Varto":"49600"},
-    "Nevşehir": {"Acıgöl":"50300", "Avanos":"50500", "Derinkuyu":"50700", "Gülşehir":"50900", "Hacıbektaş":"50800", "Kozaklı":"50600", "Merkez":"50000", "Ürgüp":"50400"},
-    "Niğde": {"Altunhisar":"51550", "Bor":"51700", "Çamardı":"51600", "Çiftlik":"51500", "Merkez":"51000", "Ulukışla":"51900"},
-    "Ordu": {"Akkuş":"52850", "Altınordu":"52020", "Aybastı":"52500", "Çamaş":"52450", "Çatalpınar":"52460", "Çaybaşı":"52330", "Fatsa":"52400", "Gölköy":"52600", "Gülyalı":"52010", "Gürgentepe":"52610", "İkizce":"52310", "Kabadüz":"52030", "Kabataş":"52530", "Korgan":"52700", "Kumru":"52800", "Mesudiye":"52200", "Perşembe":"52750", "Ulubey":"52550", "Ünye":"52300"},
-    "Rize": {"Ardeşen":"53400", "Çamlıhemşin":"53780", "Çayeli":"53200", "Derepazarı":"53360", "Fındıklı":"53700", "Güneysu":"53350", "Hemşin":"53550", "İkizdere":"53690", "İyidere":"53600", "Kalkandere":"53500", "Merkez":"53000", "Pazar":"53300"},
-    "Sakarya": {"Adapazarı":"54100", "Akyazı":"54400", "Arifiye":"54580", "Erenler":"54200", "Ferizli":"54110", "Geyve":"54700", "Hendek":"54300", "Karapürçek":"54420", "Karasu":"54500", "Kaynarca":"54600", "Kocaali":"54800", "Pamukova":"54900", "Sapanca":"54600", "Serdivan":"54050", "Söğütlü":"54120", "Taraklı":"54750"},
-    "Samsun": {"19 Mayıs":"55420", "Alaçam":"55800", "Asarcık":"55860", "Atakum":"55200", "Ayvacık":"55550", "Bafra":"55400", "Canik":"55080", "Çarşamba":"55500", "Havza":"55700", "İlkadım":"55020", "Kavak":"55580", "Ladik":"55760", "Salıpazarı":"55680", "Tekkeköy":"55300", "Terme":"55600", "Vezirköprü":"55700", "Yakakent":"55810"},
-    "Siirt": {"Baykan":"56300", "Eruh":"56400", "Kurtalan":"56200", "Merkez":"56000", "Pervari":"56500", "Şirvan":"56600", "Tillo":"56020"},
-    "Sinop": {"Ayancık":"57100", "Boyabat":"57200", "Dikmen":"57180", "Durağan":"57500", "Erfelek":"57130", "Gerze":"57600", "Merkez":"57000", "Saraydüzü":"57250", "Türkeli":"57300"},
-    "Sivas": {"Akıncılar":"58550", "Altınyayla":"58850", "Divriği":"58300", "Doğanşar":"58610", "Gemerek":"58400", "Gölova":"58560", "Gürün":"58800", "Hafik":"58760", "İmranlı":"58980", "Kangal":"58900", "Koyulhisar":"58660", "Merkez":"58000", "Suşehri":"58600", "Şarkışla":"58400", "Ulaş":"58950", "Yıldızeli":"58500", "Zara":"58700"},
-    "Tekirdağ": {"Çerkezköy":"59500", "Çorlu":"59850", "Ergene":"59930", "Hayrabolu":"59400", "Kapaklı":"59510", "Malkara":"59300", "Marmaraereğlisi":"59740", "Muratlı":"59700", "Saray":"59600", "Süleymanpaşa":"59030", "Şarköy":"59800"},
-    "Tokat": {"Almus":"60200", "Artova":"60660", "Başçiftlik":"60620", "Erbaa":"60500", "Merkez":"60000", "Niksar":"60600", "Pazar":"60800", "Reşadiye":"60700", "Sulusaray":"60870", "Turhal":"60300", "Yeşilyurt":"60860", "Zile":"60400"},
-    "Trabzon": {"Akçaabat":"61300", "Araklı":"61700", "Arsin":"61900", "Beşikdüzü":"61400", "Çarşıbaşı":"61410", "Çaykara":"61940", "Dernekpazarı":"61960", "Düzköy":"61390", "Hayrat":"61820", "Köprübaşı":"61630", "Maçka":"61750", "Of":"61830", "Ortahisar":"61030", "Sürmene":"61600", "Şalpazarı":"61460", "Tonya":"61500", "Vakfıkebir":"61400", "Yomra":"61250"},
-    "Tunceli": {"Çemişgezek":"62600", "Hozat":"62500", "Mazgirt":"62800", "Merkez":"62000", "Nazımiye":"62700", "Ovacık":"62400", "Pertek":"62500", "Pülümür":"62900"},
-    "Şanlıurfa": {"Akçakale":"63500", "Birecik":"63400", "Bozova":"63850", "Ceylanpınar":"63760", "Eyyübiye":"63200", "Halfeti":"63270", "Haliliye":"63040", "Harran":"63570", "Hilvan":"63900", "Karaköprü":"63320", "Siverek":"63600", "Suruç":"63800", "Viranşehir":"63700"},
-    "Uşak": {"Banaz":"64500", "Eşme":"64600", "Karahallı":"64700", "Merkez":"64000", "Sivaslı":"64800", "Ulubey":"64900"},
-    "Van": {"Bahçesaray":"65800", "Başkale":"65600", "Çaldıran":"65950", "Çatak":"65700", "Edremit":"65130", "Erciş":"65400", "Gevaş":"65800", "Gürpınar":"65900", "İpekyolu":"65100", "Muradiye":"65500", "Özalp":"65900", "Saray":"65960", "Tuşba":"65040"},
-    "Yozgat": {"Akdağmadeni":"66300", "Aydıncık":"66120", "Boğazlıyan":"66400", "Çandır":"66450", "Çayıralan":"66500", "Çekerek":"66200", "Kadışehri":"66250", "Merkez":"66000", "Saraykent":"66350", "Sarıkaya":"66600", "Sorgun":"66500", "Şefaatli":"66800", "Yenifakılı":"66460", "Yerköy":"66900"},
-    "Zonguldak": {"Alaplı":"67850", "Çaycuma":"67900", "Devrek":"67800", "Ereğli":"67300", "Gökçebey":"67700", "Kilimli":"67280", "Kozlu":"67160", "Merkez":"67000"},
-    "Aksaray": {"Ağaçören":"68600", "Eskil":"68400", "Gülağaç":"68900", "Güzelyurt":"68500", "Merkez":"68000", "Ortaköy":"68200", "Sarıyahşi":"68700", "Sultanhanı":"68100"},
-    "Bayburt": {"Aydıntepe":"69500", "Demirözü":"69400", "Merkez":"69000"},
-    "Karaman": {"Ayrancı":"70500", "Başyayla":"70600", "Ermenek":"70400", "Kazımkarabekir":"70300", "Merkez":"70000", "Sarıveliler":"70650"},
-    "Kırıkkale": {"Bahşılı":"71460", "Balışeyh":"71500", "Çelebi":"71720", "Delice":"71600", "Karakeçili":"71740", "Keskin":"71800", "Merkez":"71000", "Sulakyurt":"71900", "Yahşihan":"71450"},
-    "Batman": {"Beşiri":"72200", "Gercüş":"72300", "Hasankeyf":"72350", "Kozluk":"72400", "Merkez":"72000", "Sason":"72500"},
-    "Şırnak": {"Beytüşşebap":"73800", "Cizre":"73200", "Güçlükonak":"73300", "İdil":"73300", "Merkez":"73000", "Silopi":"73400", "Uludere":"73500"},
-    "Bartın": {"Amasra":"74300", "Kurucaşile":"74600", "Merkez":"74000", "Ulus":"74400"},
-    "Ardahan": {"Çıldır":"75500", "Damal":"75600", "Göle":"75700", "Hanak":"75800", "Merkez":"75000", "Posof":"75900"},
-    "Iğdır": {"Aralık":"76500", "Karakoyunlu":"76200", "Merkez":"76000", "Tuzluca":"76900"},
-    "Yalova": {"Altınova":"77700", "Armutlu":"77500", "Çınarcık":"77300", "Çiftlikköy":"77600", "Merkez":"77000", "Termal":"77400"},
-    "Karabük": {"Eflani":"78300", "Eskipazar":"78400", "Merkez":"78000", "Ovacık":"78800", "Safranbolu":"78600", "Yenice":"78700"},
-    "Kilis": {"Elbeyli":"79500", "Merkez":"79000", "Musabeyli":"79400", "Polateli":"79600"},
-    "Osmaniye": {"Bahçe":"80500", "Düziçi":"80600", "Hasanbeyli":"80550", "Kadirli":"80700", "Merkez":"80000", "Sumbas":"80750", "Toprakkale":"80100"},
-    "Düzce": {"Akçakoca":"81650", "Cumayeri":"81700", "Çilimli":"81750", "Gölyaka":"81800", "Gümüşova":"81850", "Kaynaşlı":"81900", "Merkez":"81000", "Yığılca":"81950"}
-  };
+  const now0 = new Date();
+  todayNote.textContent = 'Bugün: ' + now0.toLocaleDateString('tr-TR', { day:'numeric', month:'long', year:'numeric' });
 
-  const ilSelect = document.getElementById("ilSecim");
-  const ilceSelect = document.getElementById("ilceSecim");
-  const sonucAlani = document.getElementById("sonucAlani");
-  const ilceSonucAlani = document.getElementById("ilceSonucAlani");
-  const sonucCizgisi = document.getElementById("sonucCizgisi");
-  const ilPostaKodu = document.getElementById("ilPostaKodu");
-  const ilcePostaKodu = document.getElementById("ilcePostaKodu");
-  const txtSecilenIl = document.getElementById("txtSecilenIl");
-  const txtSecilenIlce = document.getElementById("txtSecilenIlce");
-  const pkContainer = document.getElementById("pkContainer");
+  // Populate day 1-31
+  for(let i=1;i<=31;i++){
+    const o = document.createElement('option');
+    o.value = i; o.textContent = i;
+    if(i===1) o.selected = true;
+    dDay.appendChild(o);
+  }
+  // Populate years (current year down to 1900)
+  const curYear = now0.getFullYear();
+  for(let y=curYear;y>=1900;y--){
+    const o = document.createElement('option');
+    o.value = y; o.textContent = y;
+    if(y===2000) o.selected = true;
+    dYear.appendChild(o);
+  }
+  // Populate hours / minutes
+  for(let h=0;h<24;h++){
+    const o=document.createElement('option');
+    o.value=h; o.textContent=String(h).padStart(2,'0');
+    dHour.appendChild(o);
+  }
+  for(let m=0;m<60;m++){
+    const o=document.createElement('option');
+    o.value=m; o.textContent=String(m).padStart(2,'0');
+    dMin.appendChild(o);
+  }
+  dMonth.value = "0";
 
-  // DÜZELTME: sabit max-height yerine sonuç kutusunun gerçek içerik
-  // yüksekliğini ölçüp inline stil olarak uyguluyoruz. Bu sayede il+ilçe
-  // ikisi birden göründüğünde asla kesilme olmuyor.
-  function sonucYuksekliginiAyarla() {
-    if (sonucAlani.classList.contains("pk-visible")) {
-      // Ölçüm yapabilmek için geçici olarak sınırı kaldırıyoruz
-      sonucAlani.style.maxHeight = "none";
-      const gercekYukseklik = sonucAlani.scrollHeight;
-      sonucAlani.style.maxHeight = gercekYukseklik + "px";
-    } else {
-      sonucAlani.style.maxHeight = "0px";
-    }
+  timeCheck.addEventListener('change', ()=>{
+    timeRow.classList.toggle('open', timeCheck.checked);
+  });
+
+  let tickInterval = null;
+  let birthDate = null;
+
+  function daysInMonth(year, month){ // month: 0-11
+    return new Date(year, month+1, 0).getDate();
   }
 
-  // Üst pencereye (WordPress sitesine) gerçek yüksekliği bildir,
-  // böylece iframe her zaman içerik kadar yer kaplar, fazladan boşluk kalmaz.
-  function bildirYukseklik() {
-    const yukseklik = pkContainer.getBoundingClientRect().height;
-    window.parent.postMessage({ pkPostaKoduYukseklik: Math.ceil(yukseklik) }, "*");
+  function fmt(n){
+    return n.toLocaleString('tr-TR');
   }
 
-  // Sayfa açılışında illeri yükle
-  window.addEventListener("load", function() {
-    const iller = Object.keys(postaKoduVerisi).sort();
-    iller.forEach(il => {
-      let option = document.createElement("option");
-      option.value = il;
-      option.textContent = il;
-      ilSelect.appendChild(option);
-    });
-    bildirYukseklik();
-  });
+  function computeAndRender(){
+    const day = parseInt(dDay.value,10);
+    const month = parseInt(dMonth.value,10);
+    const year = parseInt(dYear.value,10);
+    const hour = timeCheck.checked ? parseInt(dHour.value,10) : 0;
+    const min = timeCheck.checked ? parseInt(dMin.value,10) : 0;
 
-  // İl Seçildiğinde Çalışacak Kodlar
-  ilSelect.addEventListener("change", function() {
-    const secilenIl = this.value;
-    ilceSelect.innerHTML = '<option value="">Lütfen bir ilçe seçin</option>';
+    birthDate = new Date(year, month, day, hour, min, 0);
 
-    ilceSonucAlani.style.display = "none";
-    sonucCizgisi.style.display = "none";
-
-    if (secilenIl) {
-      ilceSelect.disabled = false;
-
-      txtSecilenIl.textContent = secilenIl;
-      ilPostaKodu.textContent = ilGenelKodlari[secilenIl];
-      sonucAlani.classList.add("pk-visible");
-
-      const ilceler = Object.keys(postaKoduVerisi[secilenIl]).sort();
-      ilceler.forEach(ilce => {
-        let option = document.createElement("option");
-        option.value = ilce;
-        option.textContent = ilce;
-        ilceSelect.appendChild(option);
-      });
-    } else {
-      ilceSelect.disabled = true;
-      ilceSelect.innerHTML = '<option value="">Önce il seçmelisiniz</option>';
-      sonucAlani.classList.remove("pk-visible");
+    if(birthDate > new Date()){
+      weekdayNote.innerHTML = '<strong>Bu tarih henüz gelmedi.</strong> Lütfen geçmiş bir tarih seç.';
+      return;
     }
 
-    sonucYuksekliginiAyarla();
-    setTimeout(bildirYukseklik, 60);
-    setTimeout(bildirYukseklik, 400);
-  });
+    const weekdayName = birthDate.toLocaleDateString('tr-TR', { weekday: 'long' });
+    weekdayNote.innerHTML = 'Doğduğun gün <strong>' + weekdayName + '</strong>.';
 
-  // İlçe Seçildiğinde Çalışacak Kodlar
-  ilceSelect.addEventListener("change", function() {
-    const secilenIl = ilSelect.value;
-    const secilenIlce = this.value;
+    placeholder.style.display = 'none';
+    panelContent.classList.add('show');
 
-    if (secilenIlce) {
-      txtSecilenIlce.textContent = secilenIlce;
-      ilcePostaKodu.textContent = postaKoduVerisi[secilenIl][secilenIlce];
+    if(tickInterval) clearInterval(tickInterval);
+    renderLive();
+    tickInterval = setInterval(renderLive, 1000);
+  }
 
-      sonucCizgisi.style.display = "block";
-      ilceSonucAlani.style.display = "block";
-    } else {
-      sonucCizgisi.style.display = "none";
-      ilceSonucAlani.style.display = "none";
+  function renderLive(){
+    const now = new Date();
+
+    // calendar-accurate years / months / days
+    let years = now.getFullYear() - birthDate.getFullYear();
+    let months = now.getMonth() - birthDate.getMonth();
+    let days = now.getDate() - birthDate.getDate();
+
+    if(days < 0){
+      months -= 1;
+      const prevMonthDate = new Date(now.getFullYear(), now.getMonth(), 0);
+      days += prevMonthDate.getDate();
+    }
+    if(months < 0){
+      years -= 1;
+      months += 12;
     }
 
-    // İlçe alanı açılıp kapandığında da yüksekliği yeniden hesapla
-    sonucYuksekliginiAyarla();
-    setTimeout(bildirYukseklik, 60);
-    setTimeout(bildirYukseklik, 400);
-  });
+    document.getElementById('age-years').textContent = fmt(years);
+    document.getElementById('age-detail').textContent =
+      'Tam olarak ' + years + ' yıl, ' + months + ' ay, ' + days + ' gün';
 
-  window.addEventListener("resize", bildirYukseklik);
+    const diffMs = now - birthDate;
+    const totalMinutes = Math.floor(diffMs / 60000);
+    const totalHours = Math.floor(diffMs / 3600000);
+    const totalDays = Math.floor(diffMs / 86400000);
+    const totalWeeks = Math.floor(totalDays / 7);
+    const totalMonthsApprox = years*12 + months;
+    const totalSeconds = Math.floor(diffMs / 1000);
+
+    document.getElementById('stat-months').textContent = fmt(totalMonthsApprox);
+    document.getElementById('stat-weeks').textContent = fmt(totalWeeks);
+    document.getElementById('stat-days').textContent = fmt(totalDays);
+    document.getElementById('stat-hours').textContent = fmt(totalHours);
+    document.getElementById('stat-mins').textContent = fmt(totalMinutes);
+    document.getElementById('stat-secs').textContent = fmt(totalSeconds);
+
+    // next birthday countdown
+    let next = new Date(now.getFullYear(), birthDate.getMonth(), birthDate.getDate(), birthDate.getHours(), birthDate.getMinutes(), 0);
+    if(next <= now){
+      next = new Date(now.getFullYear()+1, birthDate.getMonth(), birthDate.getDate(), birthDate.getHours(), birthDate.getMinutes(), 0);
+    }
+    const cdMs = next - now;
+    const cdDays = Math.floor(cdMs / 86400000);
+    const cdHours = Math.floor((cdMs % 86400000) / 3600000);
+    const cdMins = Math.floor((cdMs % 3600000) / 60000);
+    const cdSecs = Math.floor((cdMs % 60000) / 1000);
+
+    document.getElementById('cd-val').textContent =
+      cdDays + ' gün ' + String(cdHours).padStart(2,'0') + ' sa ' +
+      String(cdMins).padStart(2,'0') + ' dk ' + String(cdSecs).padStart(2,'0') + ' sn';
+  }
+
+  calcBtn.addEventListener('click', computeAndRender);
+})();
 </script>
 
 </body>
